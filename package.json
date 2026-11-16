@@ -1,0 +1,36 @@
+{
+  "name": "tsutome",
+  "version": "0.1.0",
+  "description": "Duties that arise from rules: what must be done, by when and by whom, read from a record of what happened, and closed by evidence instead of a checkbox.",
+  "license": "Apache-2.0",
+  "repository": "github:eucassoc/tsutome",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    ".": "./dist/src/index.js"
+  },
+  "types": "./dist/src/index.d.ts",
+  "bin": {
+    "tsutome": "dist/src/cli.js",
+    "tsutome-mcp": "dist/src/mcp.js"
+  },
+  "files": [
+    "dist/src"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build",
+    "test": "npm run build && node --test \"dist/test/**/*.test.js\"",
+    "prepublishOnly": "npm test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.9.0"
+  }
+}
