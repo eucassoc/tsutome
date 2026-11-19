@@ -20,7 +20,7 @@
 //
 // The format is strict on purpose: one `key: value` per line, no lists, no
 // multi-line values. A file that does not parse says which line and why.
-import { sha256 } from './chain.js';
+import { sha256 } from './record.js';
 
 export interface Terms {
   id: string;
@@ -126,9 +126,9 @@ export function checkTerms(t: Terms, lineOf: (key: string) => number | undefined
 }
 
 /** Reads a rule file. `name` is the file's name, which must be the rule's id and `.md`. */
-export function parseRule(bytes: Buffer | string, name?: string): RuleFile {
-  const buf = typeof bytes === 'string' ? Buffer.from(bytes) : bytes;
-  const lines = buf.toString('utf8').split('\n');
+export function parseRule(bytes: Uint8Array | string, name?: string): RuleFile {
+  const buf = typeof bytes === 'string' ? new TextEncoder().encode(bytes) : bytes;
+  const lines = new TextDecoder().decode(buf).split('\n');
   if (lines[0]?.trim() !== '---') throw new RuleError('a rule file begins with a line of ---', 1);
   const raw: { [k: string]: string } = {};
   const where: { [k: string]: string } = {};

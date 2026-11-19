@@ -3,7 +3,7 @@
 // Nothing is kept on the side, so that anyone holding the chain computes the
 // same duties, and what was due yesterday cannot be quietly changed today.
 import { createHash } from 'node:crypto';
-import type { Entry } from './chain.js';
+import type { Entry } from './record.js';
 import { duration, type Terms } from './rulefile.js';
 
 /** A rule as adopted: its terms at that point of the chain. */

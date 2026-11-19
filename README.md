@@ -129,6 +129,23 @@ cron job) calls `tsutome_agenda`, tells the owners, takes approvals through
 whatever the organization uses, does the work with the tools of the
 systems concerned, and records what it did.
 
+## In a service
+
+A service that keeps its chain somewhere other than a file, such as a
+Worker with its own storage, can use the reading half alone. `tsutome/core`
+needs no files and no MCP: it reads a chain from its lines and a rule from
+its text, and works out what is due. Writing the records, and keeping
+them, is the service's own.
+
+```ts
+import { parseChain, parseRule, evaluate, audit, termsToMeta } from 'tsutome/core';
+
+const rule = parseRule(text, 'delete-after-answer.md');       // the terms and the digest an adoption commits to
+const chain = parseChain(lines);                               // every problem names its line
+const { duties } = evaluate(chain.entries, new Date());        // what is due, from the chain alone
+const findings = audit(chain.entries, new Date());             // what an auditor would point at
+```
+
 ## What it does not do
 
 - **It is not a gate.** It cannot stop an agent from acting without

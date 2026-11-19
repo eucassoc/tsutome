@@ -1,6 +1,6 @@
 {
   "name": "tsutome",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Duties that arise from rules: what must be done, by when and by whom, read from a record of what happened, and closed by evidence instead of a checkbox.",
   "license": "Apache-2.0",
   "repository": "github:eucassoc/tsutome",
@@ -9,7 +9,14 @@
     "node": ">=20"
   },
   "exports": {
-    ".": "./dist/src/index.js"
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./core": {
+      "types": "./dist/src/core.d.ts",
+      "default": "./dist/src/core.js"
+    }
   },
   "types": "./dist/src/index.d.ts",
   "bin": {

@@ -118,6 +118,21 @@ tsutome audit                                       # 指摘を行番号つき�
 `tsutome_agenda` を呼び、担当に知らせ、組織で使っている道具で承認を取り、対象のシステムの道具で
 実行して、行ったことを記録します。
 
+## サービスに組み込む
+
+記録をファイル以外の場所（たとえば Worker の保存領域）に置くサービスは、読む側だけを使えます。
+`tsutome/core` はファイルも MCP も要りません。記録を行の並びから、ルールを文章から読み、
+何が期限かを計算します。記録を書くことと保管することは、サービスの側で行います。
+
+```ts
+import { parseChain, parseRule, evaluate, audit, termsToMeta } from 'tsutome/core';
+
+const rule = parseRule(text, 'delete-after-answer.md');       // 条件と、採用が指すダイジェスト
+const chain = parseChain(lines);                               // 問題があれば、行を名指しする
+const { duties } = evaluate(chain.entries, new Date());        // 記録だけから、何が期限か
+const findings = audit(chain.entries, new Date());             // 監査で指摘になること
+```
+
 ## しないこと
 
 - **門ではありません。** エージェントが承認なしに動くことを、tsutome は止められません。あとから
