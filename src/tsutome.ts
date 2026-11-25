@@ -2,8 +2,9 @@
 // no other state: no database, no server. Two people with the same two
 // things see the same duties.
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
-import { basename, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { appendRecord, ChainError, readChain, sha256, type Entry, type Problem } from './chain.js';
+import { CALENDAR_ADOPTED, calendarsFrom, calendarsInForce, calendarToMeta, parseCalendar, type Calendar, type CalendarFile, type CalendarTerms } from './calendar.js';
 import { audit, evaluate, inForce, rulesFrom, stagesDue, termsToMeta, type Duty, type Finding, type Rule, type Stage } from './duties.js';
 import { formatRule, isActor, isEvent, isKey, isReserved, parseRule, RuleError, type RuleFile, type Terms } from './rulefile.js';
 
@@ -14,6 +15,8 @@ export interface Options {
   chain: string;
   /** The directory of rule files. */
   rules: string;
+  /** The directory of calendar files. Left out: `calendars`, next to the rules. */
+  calendars?: string;
   /** The chain's name, for a chain that does not exist yet. */
   name?: string;
   now?: () => Date;
@@ -35,11 +38,24 @@ export interface RuleState {
   error?: string;
 }
 
+/** A calendar file next to what the chain says about it. */
+export interface CalendarState {
+  id: string;
+  file?: string;
+  /** As for a rule: `adopted`, `changed`, `draft`, `invalid`, or `missing` (adopted, the file is gone). */
+  state: 'adopted' | 'changed' | 'draft' | 'invalid' | 'missing';
+  terms?: CalendarTerms;
+  adopted?: Calendar;
+  error?: string;
+}
+
 export class Tsutome {
   private readonly now: () => Date;
+  private readonly calendarDir: string;
 
   constructor(private readonly opts: Options) {
     this.now = opts.now ?? (() => new Date());
+    this.calendarDir = opts.calendars ?? join(dirname(opts.rules), 'calendars');
   }
 
   /** The chain, checked. A chain that does not verify is not read further: what is due cannot be told from it. */
@@ -90,8 +106,11 @@ export class Tsutome {
   async adopt(path: string, by: string): Promise<Rule> {
     if (!isActor(by)) throw new TsutomeError('adopting a rule names who adopts it');
     const rule = await this.readRule(path);
-    const current = inForce(rulesFrom(await this.entries())).find((r) => r.id === rule.terms.id);
+    const entries = await this.entries();
+    const current = inForce(rulesFrom(entries)).find((r) => r.id === rule.terms.id);
     if (current?.digest === rule.digest) throw new TsutomeError(`${rule.terms.id} is already in force as this file stands`);
+    const cal = rule.terms.calendar;
+    if (cal && !calendarsFrom(entries).some((c) => c.id === cal)) throw new TsutomeError(`${rule.terms.id} counts business days on calendar ${cal}, which has not been adopted; a person adopts it first: tsutome adopt-calendar FILE --by NAME`);
     const e = await this.append('rule.adopted', termsToMeta(rule.terms, rule.digest, by));
     return rulesFrom(await this.entries()).find((r) => r.seq === e.seq) as Rule;
   }
@@ -132,6 +151,60 @@ export class Tsutome {
     const lastOf = new Map<string, Rule>();
     for (const r of all) lastOf.set(r.id, r);
     for (const r of lastOf.values()) if (r.retiredSeq !== undefined && !seen.has(r.id)) out.push({ id: r.id, state: 'retired', adopted: r });
+    return out;
+  }
+
+  // ---- calendars ------------------------------------------------------------
+
+  /** Reads and checks one calendar file. */
+  async readCalendar(path: string): Promise<CalendarFile> {
+    try {
+      return parseCalendar(await readFile(path), basename(path));
+    } catch (e) {
+      if (e instanceof RuleError) throw new RuleError(`${path}${e.line ? `:${e.line}` : ''}: ${e.message}`, e.line);
+      throw e;
+    }
+  }
+
+  /**
+   * A person puts a calendar in force, as the file stands. The chain keeps
+   * every day of it. Clocks that start from here on count by it; deadlines
+   * already counted stay as they were.
+   */
+  async adoptCalendar(path: string, by: string): Promise<Calendar> {
+    if (!isActor(by)) throw new TsutomeError('adopting a calendar names who adopts it');
+    const cal = await this.readCalendar(path);
+    const current = calendarsInForce(calendarsFrom(await this.entries())).find((c) => c.id === cal.terms.id);
+    if (current?.digest === cal.digest) throw new TsutomeError(`${cal.terms.id} is already in force as this file stands`);
+    const e = await this.append(CALENDAR_ADOPTED, calendarToMeta(cal.terms, cal.digest, by));
+    return calendarsFrom(await this.entries()).find((c) => c.seq === e.seq) as Calendar;
+  }
+
+  /** Every calendar file and every adopted calendar, side by side. */
+  async calendars(): Promise<CalendarState[]> {
+    const live = calendarsInForce(calendarsFrom(await this.entries()));
+    const out: CalendarState[] = [];
+    let names: string[] = [];
+    try {
+      names = (await readdir(this.calendarDir)).filter((n) => n.endsWith('.md')).sort();
+    } catch (e) {
+      if ((e as NodeJS.ErrnoException).code !== 'ENOENT') throw e;
+    }
+    const seen = new Set<string>();
+    for (const name of names) {
+      const file = join(this.calendarDir, name);
+      const id = name.slice(0, -3);
+      seen.add(id);
+      const adopted = live.find((c) => c.id === id);
+      try {
+        const cal = parseCalendar(await readFile(file), name);
+        out.push({ id, file, terms: cal.terms, state: !adopted ? 'draft' : adopted.digest === cal.digest ? 'adopted' : 'changed', ...(adopted ? { adopted } : {}) });
+      } catch (e) {
+        if (!(e instanceof RuleError)) throw e;
+        out.push({ id, file, state: 'invalid', error: `${e.line ? `line ${e.line}: ` : ''}${e.message}`, ...(adopted ? { adopted } : {}) });
+      }
+    }
+    for (const c of live) if (!seen.has(c.id)) out.push({ id: c.id, state: 'missing', adopted: c });
     return out;
   }
 

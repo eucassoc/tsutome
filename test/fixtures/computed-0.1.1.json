@@ -1,0 +1,1076 @@
+{
+ "2026-11-04T00:00:00Z": {
+  "duties": [
+   {
+    "id": "c288a32e598e",
+    "rule": "handle-inquiry",
+    "version": 1,
+    "title": "Answer inquiries within three days",
+    "about": {
+     "item": "before"
+    },
+    "triggerSeq": 0,
+    "triggeredAt": "2026-11-02T01:00:00Z",
+    "startsAt": "2026-11-02T02:00:00Z",
+    "noticeAt": "2026-11-02T02:00:00Z",
+    "dueAt": "2026-11-05T02:00:00Z",
+    "expect": "inquiry.answered",
+    "owner": "support",
+    "escalate": "manager",
+    "approvalRequired": false,
+    "status": "due",
+    "alerted": []
+   },
+   {
+    "id": "f17bebdee7ef",
+    "rule": "handle-inquiry",
+    "version": 1,
+    "title": "Answer inquiries within three days",
+    "about": {
+     "item": "a"
+    },
+    "triggerSeq": 3,
+    "triggeredAt": "2026-11-03T02:00:00Z",
+    "startsAt": "2026-11-03T02:00:00Z",
+    "noticeAt": "2026-11-03T02:00:00Z",
+    "dueAt": "2026-11-06T02:00:00Z",
+    "expect": "inquiry.answered",
+    "owner": "support",
+    "escalate": "manager",
+    "approvalRequired": false,
+    "status": "done",
+    "alerted": [],
+    "done": {
+     "seq": 6,
+     "at": "2026-11-04T08:00:00Z",
+     "by": "support"
+    }
+   },
+   {
+    "id": "6bb82ad53053",
+    "rule": "handle-inquiry",
+    "version": 1,
+    "title": "Answer inquiries within three days",
+    "about": {
+     "item": "b"
+    },
+    "triggerSeq": 4,
+    "triggeredAt": "2026-11-03T02:00:00Z",
+    "startsAt": "2026-11-03T02:00:00Z",
+    "noticeAt": "2026-11-03T02:00:00Z",
+    "dueAt": "2026-11-06T02:00:00Z",
+    "expect": "inquiry.answered",
+    "owner": "support",
+    "escalate": "manager",
+    "approvalRequired": false,
+    "status": "done_late",
+    "alerted": [
+     "due"
+    ],
+    "done": {
+     "seq": 8,
+     "at": "2026-11-08T12:00:00Z",
+     "by": "support"
+    }
+   },
+   {
+    "id": "07418bca5e4f",
+    "rule": "delete-after-answer",
+    "version": 1,
+    "title": "Delete 30 days after the answer",
+    "about": {
+     "item": "a"
+    },
+    "triggerSeq": 6,
+    "triggeredAt": "2026-11-04T08:00:00Z",
+    "startsAt": "2026-11-04T08:00:00Z",
+    "noticeAt": "2026-11-27T08:00:00Z",
+    "dueAt": "2026-12-04T08:00:00Z",
+    "expect": "data.deleted",
+    "owner": "support",
+    "escalate": "legal",
+    "approvalRequired": true,
+    "status": "waiting",
+    "alerted": []
+   },
+   {
+    "id": "e63903be7653",
+    "rule": "delete-after-answer",
+    "version": 1,
+    "title": "Delete 30 days after the answer",
+    "about": {
+     "item": "b"
+    },
+    "triggerSeq": 8,
+    "triggeredAt": "2026-11-08T12:00:00Z",
+    "startsAt": "2026-11-08T12:00:00Z",
+    "noticeAt": "2026-12-01T12:00:00Z",
+    "dueAt": "2026-12-08T12:00:00Z",
+    "expect": "data.deleted",
+    "owner": "support",
+    "escalate": "legal",
+    "approvalRequired": true,
+    "status": "waiting",
+    "alerted": []
+   },
+   {
+    "id": "d48f499729b8",
+    "rule": "handle-inquiry",
+    "version": 2,
+    "title": "Answer inquiries within three days",
+    "about": {
+     "item": "sat"
+    },
+    "triggerSeq": 10,
+    "triggeredAt": "2026-11-21T11:37:00Z",
+    "startsAt": "2026-11-21T11:37:00Z",
+    "noticeAt": "2026-11-21T11:37:00Z",
+    "dueAt": "2026-11-26T11:37:00Z",
+    "expect": "inquiry.answered",
+    "owner": "support",
+    "escalate": "manager",
+    "approvalRequired": false,
+    "status": "waiting",
+    "alerted": []
+   },
+   {
+    "id": "5a04bd9e2d6a",
+    "rule": "handle-inquiry",
+    "version": 2,
+    "title": "Answer inquiries within three days",
+    "about": {
+     "item": "held"
+    },
+    "triggerSeq": 11,
+    "triggeredAt": "2026-11-21T11:37:00Z",
+    "startsAt": "2026-11-21T11:37:00Z",
+    "noticeAt": "2026-11-21T11:37:00Z",
+    "dueAt": "2026-11-26T11:37:00Z",
+    "expect": "inquiry.answered",
+    "owner": "support",
+    "escalate": "manager",
+    "approvalRequired": false,
+    "status": "excepted",
+    "alerted": [],
+    "exception": {
+     "seq": 12,
+     "by": "manager",
+     "at": "2026-11-21T11:37:00Z"
+    }
+   }
+  ],
+  "audit": [
+   {
+    "kind": "not_told",
+    "seq": 0,
+    "duty": "c288a32e598e",
+    "message": "handle-inquiry: support has not been told that inquiry.answered for item before is due"
+   },
+   {
+    "kind": "no_key",
+    "seq": 5,
+    "message": "inquiry.received names no item; rule handle-inquiry cannot tell what it is about"
+   },
+   {
+    "kind": "late",
+    "seq": 8,
+    "duty": "6bb82ad53053",
+    "message": "handle-inquiry: inquiry.answered for item b came at 2026-11-08T12:00:00Z; it was due 2026-11-06T02:00:00Z"
+   }
+  ],
+  "agenda": {
+   "tell": [
+    {
+     "duty": {
+      "id": "c288a32e598e",
+      "rule": "handle-inquiry",
+      "version": 1,
+      "title": "Answer inquiries within three days",
+      "about": {
+       "item": "before"
+      },
+      "triggerSeq": 0,
+      "triggeredAt": "2026-11-02T01:00:00Z",
+      "startsAt": "2026-11-02T02:00:00Z",
+      "noticeAt": "2026-11-02T02:00:00Z",
+      "dueAt": "2026-11-05T02:00:00Z",
+      "expect": "inquiry.answered",
+      "owner": "support",
+      "escalate": "manager",
+      "approvalRequired": false,
+      "status": "due",
+      "alerted": []
+     },
+     "stage": "due",
+     "to": "support"
+    }
+   ],
+   "approve": [],
+   "act": [
+    {
+     "id": "c288a32e598e",
+     "rule": "handle-inquiry",
+     "version": 1,
+     "title": "Answer inquiries within three days",
+     "about": {
+      "item": "before"
+     },
+     "triggerSeq": 0,
+     "triggeredAt": "2026-11-02T01:00:00Z",
+     "startsAt": "2026-11-02T02:00:00Z",
+     "noticeAt": "2026-11-02T02:00:00Z",
+     "dueAt": "2026-11-05T02:00:00Z",
+     "expect": "inquiry.answered",
+     "owner": "support",
+     "escalate": "manager",
+     "approvalRequired": false,
+     "status": "due",
+     "alerted": []
+    }
+   ]
+  }
+ },
+ "2026-11-25T00:00:00Z": {
+  "duties": [
+   {
+    "id": "c288a32e598e",
+    "rule": "handle-inquiry",
+    "version": 1,
+    "title": "Answer inquiries within three days",
+    "about": {
+     "item": "before"
+    },
+    "triggerSeq": 0,
+    "triggeredAt": "2026-11-02T01:00:00Z",
+    "startsAt": "2026-11-02T02:00:00Z",
+    "noticeAt": "2026-11-02T02:00:00Z",
+    "dueAt": "2026-11-05T02:00:00Z",
+    "expect": "inquiry.answered",
+    "owner": "support",
+    "escalate": "manager",
+    "approvalRequired": false,
+    "status": "overdue",
+    "alerted": []
+   },
+   {
+    "id": "f17bebdee7ef",
+    "rule": "handle-inquiry",
+    "version": 1,
+    "title": "Answer inquiries within three days",
+    "about": {
+     "item": "a"
+    },
+    "triggerSeq": 3,
+    "triggeredAt": "2026-11-03T02:00:00Z",
+    "startsAt": "2026-11-03T02:00:00Z",
+    "noticeAt": "2026-11-03T02:00:00Z",
+    "dueAt": "2026-11-06T02:00:00Z",
+    "expect": "inquiry.answered",
+    "owner": "support",
+    "escalate": "manager",
+    "approvalRequired": false,
+    "status": "done",
+    "alerted": [],
+    "done": {
+     "seq": 6,
+     "at": "2026-11-04T08:00:00Z",
+     "by": "support"
+    }
+   },
+   {
+    "id": "6bb82ad53053",
+    "rule": "handle-inquiry",
+    "version": 1,
+    "title": "Answer inquiries within three days",
+    "about": {
+     "item": "b"
+    },
+    "triggerSeq": 4,
+    "triggeredAt": "2026-11-03T02:00:00Z",
+    "startsAt": "2026-11-03T02:00:00Z",
+    "noticeAt": "2026-11-03T02:00:00Z",
+    "dueAt": "2026-11-06T02:00:00Z",
+    "expect": "inquiry.answered",
+    "owner": "support",
+    "escalate": "manager",
+    "approvalRequired": false,
+    "status": "done_late",
+    "alerted": [
+     "due"
+    ],
+    "done": {
+     "seq": 8,
+     "at": "2026-11-08T12:00:00Z",
+     "by": "support"
+    }
+   },
+   {
+    "id": "07418bca5e4f",
+    "rule": "delete-after-answer",
+    "version": 1,
+    "title": "Delete 30 days after the answer",
+    "about": {
+     "item": "a"
+    },
+    "triggerSeq": 6,
+    "triggeredAt": "2026-11-04T08:00:00Z",
+    "startsAt": "2026-11-04T08:00:00Z",
+    "noticeAt": "2026-11-27T08:00:00Z",
+    "dueAt": "2026-12-04T08:00:00Z",
+    "expect": "data.deleted",
+    "owner": "support",
+    "escalate": "legal",
+    "approvalRequired": true,
+    "status": "waiting",
+    "alerted": []
+   },
+   {
+    "id": "e63903be7653",
+    "rule": "delete-after-answer",
+    "version": 1,
+    "title": "Delete 30 days after the answer",
+    "about": {
+     "item": "b"
+    },
+    "triggerSeq": 8,
+    "triggeredAt": "2026-11-08T12:00:00Z",
+    "startsAt": "2026-11-08T12:00:00Z",
+    "noticeAt": "2026-12-01T12:00:00Z",
+    "dueAt": "2026-12-08T12:00:00Z",
+    "expect": "data.deleted",
+    "owner": "support",
+    "escalate": "legal",
+    "approvalRequired": true,
+    "status": "waiting",
+    "alerted": []
+   },
+   {
+    "id": "d48f499729b8",
+    "rule": "handle-inquiry",
+    "version": 2,
+    "title": "Answer inquiries within three days",
+    "about": {
+     "item": "sat"
+    },
+    "triggerSeq": 10,
+    "triggeredAt": "2026-11-21T11:37:00Z",
+    "startsAt": "2026-11-21T11:37:00Z",
+    "noticeAt": "2026-11-21T11:37:00Z",
+    "dueAt": "2026-11-26T11:37:00Z",
+    "expect": "inquiry.answered",
+    "owner": "support",
+    "escalate": "manager",
+    "approvalRequired": false,
+    "status": "due",
+    "alerted": []
+   },
+   {
+    "id": "5a04bd9e2d6a",
+    "rule": "handle-inquiry",
+    "version": 2,
+    "title": "Answer inquiries within three days",
+    "about": {
+     "item": "held"
+    },
+    "triggerSeq": 11,
+    "triggeredAt": "2026-11-21T11:37:00Z",
+    "startsAt": "2026-11-21T11:37:00Z",
+    "noticeAt": "2026-11-21T11:37:00Z",
+    "dueAt": "2026-11-26T11:37:00Z",
+    "expect": "inquiry.answered",
+    "owner": "support",
+    "escalate": "manager",
+    "approvalRequired": false,
+    "status": "excepted",
+    "alerted": [],
+    "exception": {
+     "seq": 12,
+     "by": "manager",
+     "at": "2026-11-21T11:37:00Z"
+    }
+   }
+  ],
+  "audit": [
+   {
+    "kind": "overdue",
+    "seq": 0,
+    "duty": "c288a32e598e",
+    "message": "handle-inquiry: inquiry.answered for item before was due 2026-11-05T02:00:00Z and has not happened"
+   },
+   {
+    "kind": "not_told",
+    "seq": 0,
+    "duty": "c288a32e598e",
+    "message": "handle-inquiry: support has not been told that inquiry.answered for item before is due"
+   },
+   {
+    "kind": "not_told",
+    "seq": 0,
+    "duty": "c288a32e598e",
+    "message": "handle-inquiry: manager has not been told that inquiry.answered for item before is overdue"
+   },
+   {
+    "kind": "no_key",
+    "seq": 5,
+    "message": "inquiry.received names no item; rule handle-inquiry cannot tell what it is about"
+   },
+   {
+    "kind": "late",
+    "seq": 8,
+    "duty": "6bb82ad53053",
+    "message": "handle-inquiry: inquiry.answered for item b came at 2026-11-08T12:00:00Z; it was due 2026-11-06T02:00:00Z"
+   },
+   {
+    "kind": "not_told",
+    "seq": 10,
+    "duty": "d48f499729b8",
+    "message": "handle-inquiry: support has not been told that inquiry.answered for item sat is due"
+   }
+  ],
+  "agenda": {
+   "tell": [
+    {
+     "duty": {
+      "id": "c288a32e598e",
+      "rule": "handle-inquiry",
+      "version": 1,
+      "title": "Answer inquiries within three days",
+      "about": {
+       "item": "before"
+      },
+      "triggerSeq": 0,
+      "triggeredAt": "2026-11-02T01:00:00Z",
+      "startsAt": "2026-11-02T02:00:00Z",
+      "noticeAt": "2026-11-02T02:00:00Z",
+      "dueAt": "2026-11-05T02:00:00Z",
+      "expect": "inquiry.answered",
+      "owner": "support",
+      "escalate": "manager",
+      "approvalRequired": false,
+      "status": "overdue",
+      "alerted": []
+     },
+     "stage": "due",
+     "to": "support"
+    },
+    {
+     "duty": {
+      "id": "c288a32e598e",
+      "rule": "handle-inquiry",
+      "version": 1,
+      "title": "Answer inquiries within three days",
+      "about": {
+       "item": "before"
+      },
+      "triggerSeq": 0,
+      "triggeredAt": "2026-11-02T01:00:00Z",
+      "startsAt": "2026-11-02T02:00:00Z",
+      "noticeAt": "2026-11-02T02:00:00Z",
+      "dueAt": "2026-11-05T02:00:00Z",
+      "expect": "inquiry.answered",
+      "owner": "support",
+      "escalate": "manager",
+      "approvalRequired": false,
+      "status": "overdue",
+      "alerted": []
+     },
+     "stage": "overdue",
+     "to": "manager"
+    },
+    {
+     "duty": {
+      "id": "d48f499729b8",
+      "rule": "handle-inquiry",
+      "version": 2,
+      "title": "Answer inquiries within three days",
+      "about": {
+       "item": "sat"
+      },
+      "triggerSeq": 10,
+      "triggeredAt": "2026-11-21T11:37:00Z",
+      "startsAt": "2026-11-21T11:37:00Z",
+      "noticeAt": "2026-11-21T11:37:00Z",
+      "dueAt": "2026-11-26T11:37:00Z",
+      "expect": "inquiry.answered",
+      "owner": "support",
+      "escalate": "manager",
+      "approvalRequired": false,
+      "status": "due",
+      "alerted": []
+     },
+     "stage": "due",
+     "to": "support"
+    }
+   ],
+   "approve": [],
+   "act": [
+    {
+     "id": "c288a32e598e",
+     "rule": "handle-inquiry",
+     "version": 1,
+     "title": "Answer inquiries within three days",
+     "about": {
+      "item": "before"
+     },
+     "triggerSeq": 0,
+     "triggeredAt": "2026-11-02T01:00:00Z",
+     "startsAt": "2026-11-02T02:00:00Z",
+     "noticeAt": "2026-11-02T02:00:00Z",
+     "dueAt": "2026-11-05T02:00:00Z",
+     "expect": "inquiry.answered",
+     "owner": "support",
+     "escalate": "manager",
+     "approvalRequired": false,
+     "status": "overdue",
+     "alerted": []
+    },
+    {
+     "id": "d48f499729b8",
+     "rule": "handle-inquiry",
+     "version": 2,
+     "title": "Answer inquiries within three days",
+     "about": {
+      "item": "sat"
+     },
+     "triggerSeq": 10,
+     "triggeredAt": "2026-11-21T11:37:00Z",
+     "startsAt": "2026-11-21T11:37:00Z",
+     "noticeAt": "2026-11-21T11:37:00Z",
+     "dueAt": "2026-11-26T11:37:00Z",
+     "expect": "inquiry.answered",
+     "owner": "support",
+     "escalate": "manager",
+     "approvalRequired": false,
+     "status": "due",
+     "alerted": []
+    }
+   ]
+  }
+ },
+ "2026-12-20T00:00:00Z": {
+  "duties": [
+   {
+    "id": "c288a32e598e",
+    "rule": "handle-inquiry",
+    "version": 1,
+    "title": "Answer inquiries within three days",
+    "about": {
+     "item": "before"
+    },
+    "triggerSeq": 0,
+    "triggeredAt": "2026-11-02T01:00:00Z",
+    "startsAt": "2026-11-02T02:00:00Z",
+    "noticeAt": "2026-11-02T02:00:00Z",
+    "dueAt": "2026-11-05T02:00:00Z",
+    "expect": "inquiry.answered",
+    "owner": "support",
+    "escalate": "manager",
+    "approvalRequired": false,
+    "status": "overdue",
+    "alerted": []
+   },
+   {
+    "id": "f17bebdee7ef",
+    "rule": "handle-inquiry",
+    "version": 1,
+    "title": "Answer inquiries within three days",
+    "about": {
+     "item": "a"
+    },
+    "triggerSeq": 3,
+    "triggeredAt": "2026-11-03T02:00:00Z",
+    "startsAt": "2026-11-03T02:00:00Z",
+    "noticeAt": "2026-11-03T02:00:00Z",
+    "dueAt": "2026-11-06T02:00:00Z",
+    "expect": "inquiry.answered",
+    "owner": "support",
+    "escalate": "manager",
+    "approvalRequired": false,
+    "status": "done",
+    "alerted": [],
+    "done": {
+     "seq": 6,
+     "at": "2026-11-04T08:00:00Z",
+     "by": "support"
+    }
+   },
+   {
+    "id": "6bb82ad53053",
+    "rule": "handle-inquiry",
+    "version": 1,
+    "title": "Answer inquiries within three days",
+    "about": {
+     "item": "b"
+    },
+    "triggerSeq": 4,
+    "triggeredAt": "2026-11-03T02:00:00Z",
+    "startsAt": "2026-11-03T02:00:00Z",
+    "noticeAt": "2026-11-03T02:00:00Z",
+    "dueAt": "2026-11-06T02:00:00Z",
+    "expect": "inquiry.answered",
+    "owner": "support",
+    "escalate": "manager",
+    "approvalRequired": false,
+    "status": "done_late",
+    "alerted": [
+     "due"
+    ],
+    "done": {
+     "seq": 8,
+     "at": "2026-11-08T12:00:00Z",
+     "by": "support"
+    }
+   },
+   {
+    "id": "07418bca5e4f",
+    "rule": "delete-after-answer",
+    "version": 1,
+    "title": "Delete 30 days after the answer",
+    "about": {
+     "item": "a"
+    },
+    "triggerSeq": 6,
+    "triggeredAt": "2026-11-04T08:00:00Z",
+    "startsAt": "2026-11-04T08:00:00Z",
+    "noticeAt": "2026-11-27T08:00:00Z",
+    "dueAt": "2026-12-04T08:00:00Z",
+    "expect": "data.deleted",
+    "owner": "support",
+    "escalate": "legal",
+    "approvalRequired": true,
+    "status": "overdue",
+    "alerted": []
+   },
+   {
+    "id": "e63903be7653",
+    "rule": "delete-after-answer",
+    "version": 1,
+    "title": "Delete 30 days after the answer",
+    "about": {
+     "item": "b"
+    },
+    "triggerSeq": 8,
+    "triggeredAt": "2026-11-08T12:00:00Z",
+    "startsAt": "2026-11-08T12:00:00Z",
+    "noticeAt": "2026-12-01T12:00:00Z",
+    "dueAt": "2026-12-08T12:00:00Z",
+    "expect": "data.deleted",
+    "owner": "support",
+    "escalate": "legal",
+    "approvalRequired": true,
+    "status": "overdue",
+    "alerted": []
+   },
+   {
+    "id": "d48f499729b8",
+    "rule": "handle-inquiry",
+    "version": 2,
+    "title": "Answer inquiries within three days",
+    "about": {
+     "item": "sat"
+    },
+    "triggerSeq": 10,
+    "triggeredAt": "2026-11-21T11:37:00Z",
+    "startsAt": "2026-11-21T11:37:00Z",
+    "noticeAt": "2026-11-21T11:37:00Z",
+    "dueAt": "2026-11-26T11:37:00Z",
+    "expect": "inquiry.answered",
+    "owner": "support",
+    "escalate": "manager",
+    "approvalRequired": false,
+    "status": "overdue",
+    "alerted": []
+   },
+   {
+    "id": "5a04bd9e2d6a",
+    "rule": "handle-inquiry",
+    "version": 2,
+    "title": "Answer inquiries within three days",
+    "about": {
+     "item": "held"
+    },
+    "triggerSeq": 11,
+    "triggeredAt": "2026-11-21T11:37:00Z",
+    "startsAt": "2026-11-21T11:37:00Z",
+    "noticeAt": "2026-11-21T11:37:00Z",
+    "dueAt": "2026-11-26T11:37:00Z",
+    "expect": "inquiry.answered",
+    "owner": "support",
+    "escalate": "manager",
+    "approvalRequired": false,
+    "status": "excepted",
+    "alerted": [],
+    "exception": {
+     "seq": 12,
+     "by": "manager",
+     "at": "2026-11-21T11:37:00Z"
+    }
+   }
+  ],
+  "audit": [
+   {
+    "kind": "overdue",
+    "seq": 0,
+    "duty": "c288a32e598e",
+    "message": "handle-inquiry: inquiry.answered for item before was due 2026-11-05T02:00:00Z and has not happened"
+   },
+   {
+    "kind": "not_told",
+    "seq": 0,
+    "duty": "c288a32e598e",
+    "message": "handle-inquiry: support has not been told that inquiry.answered for item before is due"
+   },
+   {
+    "kind": "not_told",
+    "seq": 0,
+    "duty": "c288a32e598e",
+    "message": "handle-inquiry: manager has not been told that inquiry.answered for item before is overdue"
+   },
+   {
+    "kind": "no_key",
+    "seq": 5,
+    "message": "inquiry.received names no item; rule handle-inquiry cannot tell what it is about"
+   },
+   {
+    "kind": "overdue",
+    "seq": 6,
+    "duty": "07418bca5e4f",
+    "message": "delete-after-answer: data.deleted for item a was due 2026-12-04T08:00:00Z and has not happened"
+   },
+   {
+    "kind": "not_told",
+    "seq": 6,
+    "duty": "07418bca5e4f",
+    "message": "delete-after-answer: support has not been told that data.deleted for item a is due"
+   },
+   {
+    "kind": "not_told",
+    "seq": 6,
+    "duty": "07418bca5e4f",
+    "message": "delete-after-answer: legal has not been told that data.deleted for item a is overdue"
+   },
+   {
+    "kind": "late",
+    "seq": 8,
+    "duty": "6bb82ad53053",
+    "message": "handle-inquiry: inquiry.answered for item b came at 2026-11-08T12:00:00Z; it was due 2026-11-06T02:00:00Z"
+   },
+   {
+    "kind": "overdue",
+    "seq": 8,
+    "duty": "e63903be7653",
+    "message": "delete-after-answer: data.deleted for item b was due 2026-12-08T12:00:00Z and has not happened"
+   },
+   {
+    "kind": "not_told",
+    "seq": 8,
+    "duty": "e63903be7653",
+    "message": "delete-after-answer: support has not been told that data.deleted for item b is due"
+   },
+   {
+    "kind": "not_told",
+    "seq": 8,
+    "duty": "e63903be7653",
+    "message": "delete-after-answer: legal has not been told that data.deleted for item b is overdue"
+   },
+   {
+    "kind": "overdue",
+    "seq": 10,
+    "duty": "d48f499729b8",
+    "message": "handle-inquiry: inquiry.answered for item sat was due 2026-11-26T11:37:00Z and has not happened"
+   },
+   {
+    "kind": "not_told",
+    "seq": 10,
+    "duty": "d48f499729b8",
+    "message": "handle-inquiry: support has not been told that inquiry.answered for item sat is due"
+   },
+   {
+    "kind": "not_told",
+    "seq": 10,
+    "duty": "d48f499729b8",
+    "message": "handle-inquiry: manager has not been told that inquiry.answered for item sat is overdue"
+   }
+  ],
+  "agenda": {
+   "tell": [
+    {
+     "duty": {
+      "id": "c288a32e598e",
+      "rule": "handle-inquiry",
+      "version": 1,
+      "title": "Answer inquiries within three days",
+      "about": {
+       "item": "before"
+      },
+      "triggerSeq": 0,
+      "triggeredAt": "2026-11-02T01:00:00Z",
+      "startsAt": "2026-11-02T02:00:00Z",
+      "noticeAt": "2026-11-02T02:00:00Z",
+      "dueAt": "2026-11-05T02:00:00Z",
+      "expect": "inquiry.answered",
+      "owner": "support",
+      "escalate": "manager",
+      "approvalRequired": false,
+      "status": "overdue",
+      "alerted": []
+     },
+     "stage": "due",
+     "to": "support"
+    },
+    {
+     "duty": {
+      "id": "c288a32e598e",
+      "rule": "handle-inquiry",
+      "version": 1,
+      "title": "Answer inquiries within three days",
+      "about": {
+       "item": "before"
+      },
+      "triggerSeq": 0,
+      "triggeredAt": "2026-11-02T01:00:00Z",
+      "startsAt": "2026-11-02T02:00:00Z",
+      "noticeAt": "2026-11-02T02:00:00Z",
+      "dueAt": "2026-11-05T02:00:00Z",
+      "expect": "inquiry.answered",
+      "owner": "support",
+      "escalate": "manager",
+      "approvalRequired": false,
+      "status": "overdue",
+      "alerted": []
+     },
+     "stage": "overdue",
+     "to": "manager"
+    },
+    {
+     "duty": {
+      "id": "07418bca5e4f",
+      "rule": "delete-after-answer",
+      "version": 1,
+      "title": "Delete 30 days after the answer",
+      "about": {
+       "item": "a"
+      },
+      "triggerSeq": 6,
+      "triggeredAt": "2026-11-04T08:00:00Z",
+      "startsAt": "2026-11-04T08:00:00Z",
+      "noticeAt": "2026-11-27T08:00:00Z",
+      "dueAt": "2026-12-04T08:00:00Z",
+      "expect": "data.deleted",
+      "owner": "support",
+      "escalate": "legal",
+      "approvalRequired": true,
+      "status": "overdue",
+      "alerted": []
+     },
+     "stage": "due",
+     "to": "support"
+    },
+    {
+     "duty": {
+      "id": "07418bca5e4f",
+      "rule": "delete-after-answer",
+      "version": 1,
+      "title": "Delete 30 days after the answer",
+      "about": {
+       "item": "a"
+      },
+      "triggerSeq": 6,
+      "triggeredAt": "2026-11-04T08:00:00Z",
+      "startsAt": "2026-11-04T08:00:00Z",
+      "noticeAt": "2026-11-27T08:00:00Z",
+      "dueAt": "2026-12-04T08:00:00Z",
+      "expect": "data.deleted",
+      "owner": "support",
+      "escalate": "legal",
+      "approvalRequired": true,
+      "status": "overdue",
+      "alerted": []
+     },
+     "stage": "overdue",
+     "to": "legal"
+    },
+    {
+     "duty": {
+      "id": "e63903be7653",
+      "rule": "delete-after-answer",
+      "version": 1,
+      "title": "Delete 30 days after the answer",
+      "about": {
+       "item": "b"
+      },
+      "triggerSeq": 8,
+      "triggeredAt": "2026-11-08T12:00:00Z",
+      "startsAt": "2026-11-08T12:00:00Z",
+      "noticeAt": "2026-12-01T12:00:00Z",
+      "dueAt": "2026-12-08T12:00:00Z",
+      "expect": "data.deleted",
+      "owner": "support",
+      "escalate": "legal",
+      "approvalRequired": true,
+      "status": "overdue",
+      "alerted": []
+     },
+     "stage": "due",
+     "to": "support"
+    },
+    {
+     "duty": {
+      "id": "e63903be7653",
+      "rule": "delete-after-answer",
+      "version": 1,
+      "title": "Delete 30 days after the answer",
+      "about": {
+       "item": "b"
+      },
+      "triggerSeq": 8,
+      "triggeredAt": "2026-11-08T12:00:00Z",
+      "startsAt": "2026-11-08T12:00:00Z",
+      "noticeAt": "2026-12-01T12:00:00Z",
+      "dueAt": "2026-12-08T12:00:00Z",
+      "expect": "data.deleted",
+      "owner": "support",
+      "escalate": "legal",
+      "approvalRequired": true,
+      "status": "overdue",
+      "alerted": []
+     },
+     "stage": "overdue",
+     "to": "legal"
+    },
+    {
+     "duty": {
+      "id": "d48f499729b8",
+      "rule": "handle-inquiry",
+      "version": 2,
+      "title": "Answer inquiries within three days",
+      "about": {
+       "item": "sat"
+      },
+      "triggerSeq": 10,
+      "triggeredAt": "2026-11-21T11:37:00Z",
+      "startsAt": "2026-11-21T11:37:00Z",
+      "noticeAt": "2026-11-21T11:37:00Z",
+      "dueAt": "2026-11-26T11:37:00Z",
+      "expect": "inquiry.answered",
+      "owner": "support",
+      "escalate": "manager",
+      "approvalRequired": false,
+      "status": "overdue",
+      "alerted": []
+     },
+     "stage": "due",
+     "to": "support"
+    },
+    {
+     "duty": {
+      "id": "d48f499729b8",
+      "rule": "handle-inquiry",
+      "version": 2,
+      "title": "Answer inquiries within three days",
+      "about": {
+       "item": "sat"
+      },
+      "triggerSeq": 10,
+      "triggeredAt": "2026-11-21T11:37:00Z",
+      "startsAt": "2026-11-21T11:37:00Z",
+      "noticeAt": "2026-11-21T11:37:00Z",
+      "dueAt": "2026-11-26T11:37:00Z",
+      "expect": "inquiry.answered",
+      "owner": "support",
+      "escalate": "manager",
+      "approvalRequired": false,
+      "status": "overdue",
+      "alerted": []
+     },
+     "stage": "overdue",
+     "to": "manager"
+    }
+   ],
+   "approve": [
+    {
+     "id": "07418bca5e4f",
+     "rule": "delete-after-answer",
+     "version": 1,
+     "title": "Delete 30 days after the answer",
+     "about": {
+      "item": "a"
+     },
+     "triggerSeq": 6,
+     "triggeredAt": "2026-11-04T08:00:00Z",
+     "startsAt": "2026-11-04T08:00:00Z",
+     "noticeAt": "2026-11-27T08:00:00Z",
+     "dueAt": "2026-12-04T08:00:00Z",
+     "expect": "data.deleted",
+     "owner": "support",
+     "escalate": "legal",
+     "approvalRequired": true,
+     "status": "overdue",
+     "alerted": []
+    },
+    {
+     "id": "e63903be7653",
+     "rule": "delete-after-answer",
+     "version": 1,
+     "title": "Delete 30 days after the answer",
+     "about": {
+      "item": "b"
+     },
+     "triggerSeq": 8,
+     "triggeredAt": "2026-11-08T12:00:00Z",
+     "startsAt": "2026-11-08T12:00:00Z",
+     "noticeAt": "2026-12-01T12:00:00Z",
+     "dueAt": "2026-12-08T12:00:00Z",
+     "expect": "data.deleted",
+     "owner": "support",
+     "escalate": "legal",
+     "approvalRequired": true,
+     "status": "overdue",
+     "alerted": []
+    }
+   ],
+   "act": [
+    {
+     "id": "c288a32e598e",
+     "rule": "handle-inquiry",
+     "version": 1,
+     "title": "Answer inquiries within three days",
+     "about": {
+      "item": "before"
+     },
+     "triggerSeq": 0,
+     "triggeredAt": "2026-11-02T01:00:00Z",
+     "startsAt": "2026-11-02T02:00:00Z",
+     "noticeAt": "2026-11-02T02:00:00Z",
+     "dueAt": "2026-11-05T02:00:00Z",
+     "expect": "inquiry.answered",
+     "owner": "support",
+     "escalate": "manager",
+     "approvalRequired": false,
+     "status": "overdue",
+     "alerted": []
+    },
+    {
+     "id": "d48f499729b8",
+     "rule": "handle-inquiry",
+     "version": 2,
+     "title": "Answer inquiries within three days",
+     "about": {
+      "item": "sat"
+     },
+     "triggerSeq": 10,
+     "triggeredAt": "2026-11-21T11:37:00Z",
+     "startsAt": "2026-11-21T11:37:00Z",
+     "noticeAt": "2026-11-21T11:37:00Z",
+     "dueAt": "2026-11-26T11:37:00Z",
+     "expect": "inquiry.answered",
+     "owner": "support",
+     "escalate": "manager",
+     "approvalRequired": false,
+     "status": "overdue",
+     "alerted": []
+    }
+   ]
+  }
+ }
+}

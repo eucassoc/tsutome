@@ -127,7 +127,7 @@ test('an agent over MCP: it drafts a rule, a person adopts it; it works the agen
   };
   const agent = await connect();
   const tools = (await agent.client.listTools()).tools;
-  assert.deepEqual(tools.map((t) => t.name).sort(), ['tsutome_agenda', 'tsutome_approve', 'tsutome_audit', 'tsutome_draft_rule', 'tsutome_duties', 'tsutome_duty', 'tsutome_record', 'tsutome_request_exception', 'tsutome_rules', 'tsutome_told']);
+  assert.deepEqual(tools.map((t) => t.name).sort(), ['tsutome_agenda', 'tsutome_approve', 'tsutome_audit', 'tsutome_calendars', 'tsutome_draft_rule', 'tsutome_duties', 'tsutome_duty', 'tsutome_record', 'tsutome_request_exception', 'tsutome_rules', 'tsutome_told']);
   // Nothing an agent can call puts a rule in force or grants an exception.
   assert.ok(!tools.some((t) => /adopt|retire|except$/.test(t.name)));
 

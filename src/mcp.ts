@@ -6,6 +6,8 @@
 //
 //   TSUTOME_CHAIN=tsutome.jsonl TSUTOME_RULES=rules tsutome-mcp
 //
+//   TSUTOME_CALENDARS  the directory of calendar files (default: calendars, next to the rules)
+//
 //   TSUTOME_ACTOR      the name the agent's records carry (default: agent)
 //   TSUTOME_APPROVER   the person on whose behalf tsutome_approve records an
 //                      approval; the client's permission prompt is then that
@@ -67,19 +69,25 @@ export function tsutomeServer(opts: McpOptions): McpServer {
     () => run(() => t.rules()),
   );
   server.registerTool(
+    'tsutome_calendars',
+    { title: 'List calendars', description: 'The calendars business days are counted by: each file next to what is in force, with the days it covers. Putting a calendar in force is a person\'s: `tsutome adopt-calendar FILE --by NAME`.', inputSchema: {}, annotations: read },
+    () => run(() => t.calendars()),
+  );
+  server.registerTool(
     'tsutome_draft_rule',
     {
       title: 'Write a rule file',
       description:
-        'Writes a rule as a file in the rules directory: when `when` happens to a thing, `expect` must follow within `within`. It is a draft and changes nothing until a person adopts it with `tsutome adopt FILE --by NAME`. `text` is the policy in its own words. `per` names the meta keys that identify the thing (default: item). `notice` is how long before the deadline the duty comes up (default: from the start).',
+        'Writes a rule as a file in the rules directory: when `when` happens to a thing, `expect` must follow within `within`. It is a draft and changes nothing until a person adopts it with `tsutome adopt FILE --by NAME`. `text` is the policy in its own words. `per` names the meta keys that identify the thing (default: item). `notice` is how long before the deadline the duty comes up (default: from the start). A deadline in business days (`3bd`) names the adopted `calendar` it is counted on; it ends with the last of those days, in the calendar\'s zone.',
       inputSchema: {
         id: z.string(),
         title: z.string(),
         source: z.string().optional().describe('The clause of the policy, law or contract the rule comes from'),
         when: z.string().describe('The event that starts the clock, e.g. data.answered'),
         expect: z.string().describe('The event that must follow, e.g. data.deleted'),
-        within: z.string().describe('The deadline: 30d, 12h, 45m'),
+        within: z.string().describe('The deadline: 30d, 12h, 45m, or 3bd for business days'),
         notice: z.string().optional(),
+        calendar: z.string().optional().describe('The id of the calendar business days are counted on; required with bd, not given otherwise'),
         owner: z.string().describe('The role that must act'),
         escalate: z.string().optional().describe('The role told when the deadline has passed (default: the owner)'),
         per: z.array(z.string()).optional(),
@@ -91,7 +99,7 @@ export function tsutomeServer(opts: McpOptions): McpServer {
     },
     (a) =>
       run(async () => {
-        const file = await t.draft({ id: a.id, title: a.title, ...(a.source ? { source: a.source } : {}), when: a.when, expect: a.expect, within: a.within, notice: a.notice ?? a.within, owner: a.owner, escalate: a.escalate ?? a.owner, per: a.per ?? ['item'], approval: a.approval ?? 'none', where: a.where ?? {} }, a.text);
+        const file = await t.draft({ id: a.id, title: a.title, ...(a.source ? { source: a.source } : {}), when: a.when, expect: a.expect, within: a.within, notice: a.notice ?? a.within, ...(a.calendar ? { calendar: a.calendar } : {}), owner: a.owner, escalate: a.escalate ?? a.owner, per: a.per ?? ['item'], approval: a.approval ?? 'none', where: a.where ?? {} }, a.text);
         return { file, state: 'draft', next: `a person reviews the file and runs: tsutome adopt ${file} --by NAME` };
       }),
   );
@@ -155,6 +163,7 @@ if (invoked) {
   const server = tsutomeServer({
     chain: env.TSUTOME_CHAIN ?? 'tsutome.jsonl',
     rules: env.TSUTOME_RULES ?? 'rules',
+    ...(env.TSUTOME_CALENDARS ? { calendars: env.TSUTOME_CALENDARS } : {}),
     ...(env.TSUTOME_NAME ? { name: env.TSUTOME_NAME } : {}),
     ...(env.TSUTOME_ACTOR ? { actor: env.TSUTOME_ACTOR } : {}),
     ...(env.TSUTOME_APPROVER ? { approver: env.TSUTOME_APPROVER } : {}),

@@ -5,6 +5,9 @@
 //   tsutome adopt FILE --by NAME               put a rule in force, as the file stands
 //   tsutome retire ID --by NAME                take a rule out of force
 //   tsutome rules                              rule files next to what is in force
+//   tsutome check-calendar FILE...             read calendar files and say what is wrong, by line
+//   tsutome adopt-calendar FILE --by NAME      put a calendar of business days in force, as the file stands
+//   tsutome calendars                          calendar files next to what is in force
 //   tsutome record EVENT -m key=value...       record that something happened
 //   tsutome agenda                             whom to tell, what waits for approval, what can be done
 //   tsutome duties [--status S]                every duty and its state
@@ -18,11 +21,12 @@
 //   tsutome hmac REF                           the identifier to record in place of REF
 //
 // --chain FILE (TSUTOME_CHAIN, default tsutome.jsonl)   --rules DIR (TSUTOME_RULES, default rules)
+// --calendars DIR (TSUTOME_CALENDARS, default calendars next to the rules)
 // --name NAME (a new chain's name)   --json   --now TIME (for rehearsals)
 import { readFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 import { hmacId } from './chain.js';
-import type { Duty } from './duties.js';
+import { dueText, type Duty } from './duties.js';
 import { Tsutome } from './tsutome.js';
 import { VERSION } from './version.js';
 
@@ -31,6 +35,7 @@ const { values: o, positionals } = parseArgs({
   options: {
     chain: { type: 'string' },
     rules: { type: 'string' },
+    calendars: { type: 'string' },
     name: { type: 'string' },
     now: { type: 'string' },
     json: { type: 'boolean' },
@@ -66,7 +71,7 @@ const pairs = (list: string[] | undefined, what: string): { [k: string]: string 
   }
   return m;
 };
-const dutyLine = (d: Duty): string => `${d.id}  ${d.status.padEnd(9)}  due ${d.dueAt}  ${d.owner}  ${d.rule}: ${d.expect} for ${Object.entries(d.about).map(([k, v]) => `${k} ${v}`).join(', ')}${d.approvalRequired ? (d.approved ? `  approved by ${d.approved.by}` : '  needs approval') : ''}`;
+const dutyLine = (d: Duty): string => `${d.id}  ${d.status.padEnd(9)}  due ${dueText(d)}  ${d.owner}  ${d.rule}: ${d.expect} for ${Object.entries(d.about).map(([k, v]) => `${k} ${v}`).join(', ')}${d.approvalRequired ? (d.approved ? `  approved by ${d.approved.by}` : '  needs approval') : ''}`;
 
 async function main(): Promise<number> {
   if (o.version) return console.log(`tsutome ${VERSION}`), 0;
@@ -77,7 +82,7 @@ async function main(): Promise<number> {
   }
   const now = o.now ? new Date(o.now) : undefined;
   if (now && Number.isNaN(now.getTime())) throw new Error(`--now ${o.now}: not a time`);
-  const t = new Tsutome({ chain: o.chain ?? env.TSUTOME_CHAIN ?? 'tsutome.jsonl', rules: o.rules ?? env.TSUTOME_RULES ?? 'rules', ...(o.name ?? env.TSUTOME_NAME ? { name: (o.name ?? env.TSUTOME_NAME) as string } : {}), ...(now ? { now: () => now } : {}) });
+  const t = new Tsutome({ chain: o.chain ?? env.TSUTOME_CHAIN ?? 'tsutome.jsonl', rules: o.rules ?? env.TSUTOME_RULES ?? 'rules', ...(o.calendars ?? env.TSUTOME_CALENDARS ? { calendars: (o.calendars ?? env.TSUTOME_CALENDARS) as string } : {}), ...(o.name ?? env.TSUTOME_NAME ? { name: (o.name ?? env.TSUTOME_NAME) as string } : {}), ...(now ? { now: () => now } : {}) });
 
   switch (cmd) {
     case 'check': {
@@ -85,7 +90,7 @@ async function main(): Promise<number> {
       for (const f of args.length ? args : [need(undefined, 'the rule files to check')]) {
         try {
           const r = await t.readRule(f);
-          console.log(`${f}: ok  when ${r.terms.when}, ${r.terms.expect} within ${r.terms.within}, owner ${r.terms.owner}`);
+          console.log(`${f}: ok  when ${r.terms.when}, ${r.terms.expect} within ${r.terms.within}${r.terms.calendar ? ` by calendar ${r.terms.calendar}` : ''}, owner ${r.terms.owner}`);
         } catch (e) {
           bad += 1;
           console.error((e as Error).message);
@@ -105,6 +110,29 @@ async function main(): Promise<number> {
     case 'rules': {
       const rs = await t.rules();
       out(rs, () => rs.map((r) => `${r.state.padEnd(8)}  ${r.id}${r.adopted ? `  version ${r.adopted.version}, adopted by ${r.adopted.adoptedBy} ${r.adopted.adoptedAt}` : ''}${r.error ? `  ${r.error}` : ''}`).join('\n') || 'no rules');
+      return 0;
+    }
+    case 'check-calendar': {
+      let bad = 0;
+      for (const f of args.length ? args : [need(undefined, 'the calendar files to check')]) {
+        try {
+          const c = (await t.readCalendar(f)).terms;
+          console.log(`${f}: ok  ${c.from} to ${c.until}, ${c.timezone}, closed on ${c.weekend.join(', ') || 'no day of the week'} and ${c.closed.length} other days`);
+        } catch (e) {
+          bad += 1;
+          console.error((e as Error).message);
+        }
+      }
+      return bad ? 1 : 0;
+    }
+    case 'adopt-calendar': {
+      const c = await t.adoptCalendar(need(args[0], 'the calendar file'), need(o.by, '--by NAME, who adopts it'));
+      out(c, () => `adopted calendar ${c.id} version ${c.version} (record ${c.seq}, sha256 ${c.digest.slice(0, 12)}), ${c.from} to ${c.until}`);
+      return 0;
+    }
+    case 'calendars': {
+      const cs = await t.calendars();
+      out(cs, () => cs.map((c) => `${c.state.padEnd(8)}  ${c.id}${c.adopted ? `  version ${c.adopted.version}, ${c.adopted.from} to ${c.adopted.until} ${c.adopted.timezone}, adopted by ${c.adopted.adoptedBy} ${c.adopted.adoptedAt}` : ''}${c.error ? `  ${c.error}` : ''}`).join('\n') || 'no calendars');
       return 0;
     }
     case 'record': {

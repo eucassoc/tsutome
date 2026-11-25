@@ -3,8 +3,9 @@
 // Nothing is kept on the side, so that anyone holding the chain computes the
 // same duties, and what was due yesterday cannot be quietly changed today.
 import { createHash } from 'node:crypto';
+import { calendarsFrom, countBusinessDays, governingCalendar, type Calendar } from './calendar.js';
 import type { Entry } from './record.js';
-import { duration, type Terms } from './rulefile.js';
+import { duration, span, type Terms } from './rulefile.js';
 
 /** A rule as adopted: its terms at that point of the chain. */
 export interface Rule extends Terms {
@@ -43,6 +44,20 @@ export interface Duty {
   /** When it comes up: from then on it is time to act. */
   noticeAt: string;
   dueAt: string;
+  /** How the deadline was counted, when it was counted in business days. */
+  counted?: {
+    /** The rule's `within`, e.g. `3bd`. */
+    within: string;
+    /** The calendar and the version of it the days were counted by. */
+    calendar: string;
+    calendarVersion: number;
+    calendarDigest: string;
+    timezone: string;
+    /** The last day on which the duty can still be met in time, in the calendar's zone; `dueAt` is the end of it. */
+    lastDay: string;
+    /** The count went beyond the days the calendar covers; there only the weekend was known. */
+    beyondCalendar?: true;
+  };
   /** The event that will meet it. */
   expect: string;
   owner: string;
@@ -57,7 +72,7 @@ export interface Duty {
 }
 
 export interface Finding {
-  kind: 'overdue' | 'late' | 'unapproved' | 'plan_mismatch' | 'not_told' | 'no_key';
+  kind: 'overdue' | 'late' | 'unapproved' | 'plan_mismatch' | 'not_told' | 'no_key' | 'no_calendar' | 'beyond_calendar';
   /** The record the finding points at; its line in the file is `seq + 1`. */
   seq: number;
   duty?: string;
@@ -76,6 +91,7 @@ export function dutyId(rule: string, about: { [key: string]: string }): string {
 export function termsToMeta(t: Terms, digest: string, by: string): { [key: string]: string } {
   const meta: { [k: string]: string } = { rule: t.id, digest, title: t.title, when: t.when, expect: t.expect, within: t.within, notice: t.notice, owner: t.owner, escalate: t.escalate, per: t.per.join(','), approval: t.approval, by };
   if (t.source) meta.source = t.source;
+  if (t.calendar) meta.calendar = t.calendar;
   for (const [k, v] of Object.entries(t.where)) meta[`where.${k}`] = v;
   return meta;
 }
@@ -98,6 +114,7 @@ export function rulesFrom(entries: Entry[]): Rule[] {
         expect: m.expect ?? '',
         within: m.within ?? '',
         notice: m.notice ?? m.within ?? '',
+        ...(m.calendar ? { calendar: m.calendar } : {}),
         owner: m.owner ?? '',
         escalate: m.escalate ?? m.owner ?? '',
         per: (m.per ?? 'item').split(',').filter(Boolean),
@@ -143,8 +160,9 @@ export function stagesDue(d: Duty, now: Date): Stage[] {
 }
 
 /** Reads the chain: the duties, and where a trigger could not give rise to one. */
-export function evaluate(entries: Entry[], now: Date): { duties: Duty[]; rules: Rule[]; skipped: Finding[] } {
+export function evaluate(entries: Entry[], now: Date): { duties: Duty[]; rules: Rule[]; calendars: Calendar[]; skipped: Finding[] } {
   const rules = rulesFrom(entries);
+  const calendars = calendarsFrom(entries);
   const byId = new Map<string, Rule[]>();
   for (const r of rules) byId.set(r.id, [...(byId.get(r.id) ?? []), r]);
 
@@ -179,10 +197,28 @@ export function evaluate(entries: Entry[], now: Date): { duties: Duty[]; rules: 
       for (const k of rule.per) about[k] = e.meta[k] as string;
       const id = dutyId(rule.id, about);
       if (seen.has(id)) continue; // the first trigger starts the clock
-      seen.add(id);
       const starts = g.later ? Date.parse(rule.adoptedAt) : Date.parse(e.at);
-      const due = starts + duration(rule.within);
-      const notice = due - duration(rule.notice);
+      const within = span(rule.within);
+      let due: number;
+      let notice: number;
+      let counted: Duty['counted'];
+      if (within.unit === 'bd') {
+        // The calendar as it stood when the clock started: the record that started it is the trigger, or the rule's adoption.
+        const cal = governingCalendar(calendars, rule.calendar ?? '', g.later ? rule.seq : e.seq);
+        if (!cal) {
+          skipped.push({ kind: 'no_calendar', seq: e.seq, message: `${rule.id} counts ${rule.within} on calendar ${rule.calendar ?? '(none named)'}, which has not been adopted; no deadline can be told for ${e.event}` });
+          continue;
+        }
+        const noticeSpan = span(rule.notice);
+        const c = countBusinessDays(cal, starts, within.n, noticeSpan.unit === 'bd' ? { days: noticeSpan.n } : { ms: duration(rule.notice) });
+        due = c.dueMs;
+        notice = c.noticeMs;
+        counted = { within: rule.within, calendar: cal.id, calendarVersion: cal.version, calendarDigest: cal.digest, timezone: cal.timezone, lastDay: c.lastDay, ...(c.beyond ? { beyondCalendar: true as const } : {}) };
+      } else {
+        due = starts + duration(rule.within);
+        notice = due - duration(rule.notice);
+      }
+      seen.add(id);
       const d: Duty = {
         id,
         rule: rule.id,
@@ -194,6 +230,7 @@ export function evaluate(entries: Entry[], now: Date): { duties: Duty[]; rules: 
         startsAt: iso(starts),
         noticeAt: iso(notice),
         dueAt: iso(due),
+        ...(counted ? { counted } : {}),
         expect: rule.expect,
         owner: rule.owner,
         escalate: rule.escalate,
@@ -218,7 +255,15 @@ export function evaluate(entries: Entry[], now: Date): { duties: Duty[]; rules: 
       duties.push(d);
     }
   }
-  return { duties, rules, skipped };
+  return { duties, rules, calendars, skipped };
+}
+
+/** A deadline in words: the instant, and for one counted in business days, how it was counted. */
+export function dueText(d: Duty): string {
+  const c = d.counted;
+  if (!c) return d.dueAt;
+  const n = parseInt(c.within, 10);
+  return `${d.dueAt} (the end of ${c.lastDay} ${c.timezone}, ${n} business day${n === 1 ? '' : 's'} by calendar ${c.calendar} version ${c.calendarVersion}${c.beyondCalendar ? ', counted beyond what the calendar covers' : ''})`;
 }
 
 /** What an auditor would point at, each with the record where it shows. */
@@ -227,13 +272,14 @@ export function audit(entries: Entry[], now: Date): Finding[] {
   const out: Finding[] = [...skipped];
   const about = (d: Duty) => Object.entries(d.about).map(([k, v]) => `${k} ${v}`).join(', ');
   for (const d of duties) {
-    if (d.status === 'overdue') out.push({ kind: 'overdue', seq: d.triggerSeq, duty: d.id, message: `${d.rule}: ${d.expect} for ${about(d)} was due ${d.dueAt} and has not happened` });
-    if (d.status === 'done_late' && d.done) out.push({ kind: 'late', seq: d.done.seq, duty: d.id, message: `${d.rule}: ${d.expect} for ${about(d)} came at ${d.done.at}; it was due ${d.dueAt}` });
+    if (d.status === 'overdue') out.push({ kind: 'overdue', seq: d.triggerSeq, duty: d.id, message: `${d.rule}: ${d.expect} for ${about(d)} was due ${dueText(d)} and has not happened` });
+    if (d.status === 'done_late' && d.done) out.push({ kind: 'late', seq: d.done.seq, duty: d.id, message: `${d.rule}: ${d.expect} for ${about(d)} came at ${d.done.at}; it was due ${dueText(d)}` });
     if (d.done && d.approvalRequired && !(d.approved && d.approved.seq < d.done.seq)) out.push({ kind: 'unapproved', seq: d.done.seq, duty: d.id, message: `${d.rule}: ${d.expect} for ${about(d)} was done without the approval the rule requires` });
     if (d.done && d.approved?.plan) {
       const did = entries[d.done.seq]?.meta.plan;
       if (did && did !== d.approved.plan) out.push({ kind: 'plan_mismatch', seq: d.done.seq, duty: d.id, message: `${d.rule}: what was done for ${about(d)} is not the plan that was approved` });
     }
+    if (d.counted?.beyondCalendar && !d.done && d.status !== 'excepted' && d.status !== 'withdrawn') out.push({ kind: 'beyond_calendar', seq: d.triggerSeq, duty: d.id, message: `${d.rule}: the deadline for ${about(d)} was counted beyond what calendar ${d.counted.calendar} version ${d.counted.calendarVersion} covers; holidays after that are not known to it` });
     for (const stage of stagesDue(d, now)) out.push({ kind: 'not_told', seq: d.triggerSeq, duty: d.id, message: `${d.rule}: ${stage === 'overdue' ? d.escalate : d.owner} has not been told that ${d.expect} for ${about(d)} is ${stage === 'overdue' ? 'overdue' : 'due'}` });
   }
   return out.sort((a, b) => a.seq - b.seq);
